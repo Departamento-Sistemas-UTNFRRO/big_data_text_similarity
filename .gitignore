@@ -1,0 +1,13 @@
+### Python ###
+\.idea/
+
+__pycache__/
+
+
+### Project ###
+results/
+internal/*/*.*
+!internal/word2vec/*.*
+*/*~
+
+*.pyc
