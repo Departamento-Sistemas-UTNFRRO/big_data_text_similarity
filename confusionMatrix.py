@@ -62,7 +62,7 @@ if __name__ == '__main__':
         reader = csv.reader(training_file)
 
         for row in reader:
-            data_training.append(row[1])  #Ignores the first column
+            data_training.append(row[1])  # Ignores the first column
 
     data_questions = []
     with open(questions_path, 'r') as questions_file:

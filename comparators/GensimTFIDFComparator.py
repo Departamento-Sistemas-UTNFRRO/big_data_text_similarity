@@ -9,16 +9,15 @@ class GensimTFIDFComparator(Comparator):
     NUMBER_OF_TOKENS = 0
 
     def __init__(self):
-        ''' Initialize GensimTFIDF model.
-        '''
+        """ Initialize GensimTFIDF model.
+        """
 
         # get stopwords list
-        st = StopWords()
+        # st = StopWords()
         self.STOPWORDS = super().get_stopwords()
 
     def train(self, questions_path):
         # get questions
-        questions = []
         with open(questions_path, 'r') as ifile:
             questions = ifile.readlines()
 
@@ -47,7 +46,7 @@ class GensimTFIDFComparator(Comparator):
         # get questions representation in tfidf space vector
         question1_rep = self.MODEL[question1_vec]
         question2_rep = self.MODEL[question2_vec]
-        #print question1_rep, question2_rep
+        # print question1_rep, question2_rep
 
         # WARNING! This new_corpus is already in tfidf space vector
         new_corpus = []
@@ -55,7 +54,7 @@ class GensimTFIDFComparator(Comparator):
         index = similarities.MatrixSimilarity(new_corpus, num_features=self.NUMBER_OF_TOKENS)
 
         sims = index[new_corpus]
-        #print sims[0][1]
+        # print sims[0][1]
 
         # transform to dense vec
         # question1_dense_vec = matutils.corpus2dense(question1_rep, num_terms=self.NUMBER_OF_TOKENS)

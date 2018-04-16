@@ -7,7 +7,7 @@ def compare_pairs(questions, distances, comparator, q1_col, q2_col):
 
         line_number = row[0]
 
-         # Writes the distances in the shared array
+        # Writes the distances in the shared array
         distances[line_number] = distance
 
 
@@ -18,7 +18,7 @@ def compare_question(question1, questions, distances, comparator):
 
         distance = comparator.compare(question1, question2)
 
-         # Writes the distances in the shared array
+        # Writes the distances in the shared array
         distances[line_number] = distance
 
 

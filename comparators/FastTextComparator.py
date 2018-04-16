@@ -1,11 +1,9 @@
 import os, os.path, fasttext
 import numpy as np
-from utils import general_utils as gu
 from comparators.Comparator import Comparator
 
 
 class FastTextComparator(Comparator):
-
     def __init__(self):
         self.files_path = os.path.join('internal', 'fasttext')
         self.model = None

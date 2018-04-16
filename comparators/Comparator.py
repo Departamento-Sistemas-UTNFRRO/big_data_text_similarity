@@ -2,7 +2,6 @@ import numpy as np
 
 
 class Comparator(object):
-
     def get_stopwords(self):
         stopwords = []
         with open('data/stopwords.txt', 'r') as input_file:
