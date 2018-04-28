@@ -6,11 +6,10 @@ class TFIDFComparator(Comparator):
     def __init__(self):
         stopwords = super().get_stopwords()
         # Initialize model
-        self.model = TfidfVectorizer(min_df=1, ngram_range=(1), stop_words=stopwords)
+        self.model = TfidfVectorizer(min_df=1, ngram_range=1, stop_words=stopwords)
 
     def train(self, questions_path):
         # Open questions_path file and get a list from all the questions in it
-        questions = []
         with open(questions_path, 'r') as ifile:
             questions = ifile.readlines()
 
@@ -21,12 +20,10 @@ class TFIDFComparator(Comparator):
         return True
 
     def compare(self, question1, question2):
-        ''' Calculate distance between question1 and question2
-        '''
+        """ Calculate distance between question1 and question2
+        """
         # set list of size 2 to send to model
-        questions = []
-        questions.append(question1)
-        questions.append(question2)
+        questions = [question1, question2]
 
         # get tfidf representation of the given pair of questions
         question_rep = self.model.transform(questions)

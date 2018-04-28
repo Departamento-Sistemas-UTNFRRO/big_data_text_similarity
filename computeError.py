@@ -18,7 +18,7 @@ def define_runs(previous_path):
             reader = csv.reader(previous_runs)
             next(reader)  # Ignores the header
 
-            for row in reader:
+            for _ in reader:
                 first_run += 1
 
     return first_run
@@ -31,13 +31,14 @@ if __name__ == '__main__':
 
     parser = ArgumentParser('Computes the average error of a comparison technique')
 
-    parser.add_argument('-technique', dest='technique',       required=True, choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
-    parser.add_argument('-training',  dest='training_path',   required=True)
-    parser.add_argument('-questions', dest='questions_path',  required=True)
-    parser.add_argument('-np',        dest='number_training', required=True, type=int)
+    parser.add_argument('-technique', dest='technique', required=True,
+                        choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
+    parser.add_argument('-training', dest='training_path', required=True)
+    parser.add_argument('-questions', dest='questions_path', required=True)
+    parser.add_argument('-np', dest='number_training', required=True, type=int)
 
-    parser.add_argument('-workers',   dest='number_workers',  default=5, type=int)
-    parser.add_argument('-previous',  dest='previous_path')
+    parser.add_argument('-workers', dest='number_workers', default=5, type=int)
+    parser.add_argument('-previous', dest='previous_path')
 
     args = parser.parse_args()
     technique = args.technique
@@ -52,7 +53,7 @@ if __name__ == '__main__':
             os.mkdir('results')
 
         results_path = os.path.join('results', 'computeError_'
-                       + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+                                    + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
     else:
         results_path = previous_path
 
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     data_training = []
     with open(training_path, 'r') as training_file:
         reader = csv.reader(training_file)
-        next(reader) # Ignores the first line
+        next(reader)  # Ignores the first line
 
         for row in reader:
             data_training.append(row[1:])  # Ignores the first column
@@ -69,7 +70,7 @@ if __name__ == '__main__':
     data_questions = []
     with open(questions_path, 'r') as questions_file:
         reader = csv.reader(questions_file)
-        next(reader) # Ignores the first line
+        next(reader)  # Ignores the first line
 
         for row in reader:
             data_questions.append(row)
@@ -114,5 +115,3 @@ if __name__ == '__main__':
             gu.print_screen('Run ' + str(run + 1) + ' finished.')
 
     gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
-
-

@@ -4,7 +4,6 @@ from comparators.Comparator import Comparator
 
 
 class BagOfWordsComparator(Comparator):
-
     def __init__(self):
         self.stopwords = super().get_stopwords()
 

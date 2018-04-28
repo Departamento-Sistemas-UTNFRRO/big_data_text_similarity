@@ -9,7 +9,6 @@ from comparators.SemanticComparator import SemanticComparator
 
 
 class ComparatorFactory(object):
-
     def __init__(self):
         self.QUESTION1_COL = 1
         self.QUESTION2_COL = 2

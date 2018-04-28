@@ -5,17 +5,17 @@ from nltk.corpus import wordnet as wn
 import numpy as np
 
 ALPHA = 0.2
-BETA = 0.45 
+BETA = 0.45
 ETA = 0.4
-PHI = 0.2 
-DELTA = 0.85 
+PHI = 0.2
+DELTA = 0.85
 N = 0
 
 brown_freqs = dict()
 semcor_ic = wordnet_ic.ic('ic-semcor.dat')
 
+
 class SemanticComparator(object):
-    
     def get_best_synset_pair(self, word_1, word_2):
         max_sim = -1.0
         synsets_1 = wn.synsets(word_1)
@@ -31,7 +31,7 @@ class SemanticComparator(object):
                         sim = synset_1.lin_similarity(synset_2, semcor_ic)
                     except nltk.corpus.reader.wordnet.WordNetError:
                         sim = 0
-                    except: 
+                    except:
                         sim = 0
                     if sim > max_sim:
                         max_sim = sim
@@ -40,12 +40,12 @@ class SemanticComparator(object):
 
     def length_dist(self, synset_1, synset_2):
         l_dist = sys.maxsize
-        if synset_1 is None or synset_2 is None: 
+        if synset_1 is None or synset_2 is None:
             return 0.0
         if synset_1 == synset_2:
             l_dist = 0.0
         else:
-            wset_1 = set([str(x.name()) for x in synset_1.lemmas()])        
+            wset_1 = set([str(x.name()) for x in synset_1.lemmas()])
             wset_2 = set([str(x.name()) for x in synset_2.lemmas()])
             if len(wset_1.intersection(wset_2)) > 0:
                 l_dist = 1.0
@@ -57,13 +57,13 @@ class SemanticComparator(object):
 
     def hierarchy_dist(self, synset_1, synset_2):
         h_dist = sys.maxsize
-        if synset_1 is None or synset_2 is None: 
+        if synset_1 is None or synset_2 is None:
             return h_dist
         if synset_1 == synset_2:
             h_dist = max([x[1] for x in synset_1.hypernym_distances()])
         else:
-            hypernyms_1 = {x[0]:x[1] for x in synset_1.hypernym_distances()}
-            hypernyms_2 = {x[0]:x[1] for x in synset_2.hypernym_distances()}
+            hypernyms_1 = {x[0]: x[1] for x in synset_1.hypernym_distances()}
+            hypernyms_2 = {x[0]: x[1] for x in synset_2.hypernym_distances()}
             lcs_candidates = set(hypernyms_1.keys()).intersection(set(hypernyms_2.keys()))
             if len(lcs_candidates) > 0:
                 lcs_dists = []
@@ -132,7 +132,7 @@ class SemanticComparator(object):
         vec_1 = self.semantic_vector(words_1, joint_words, info_content_norm)
         vec_2 = self.semantic_vector(words_2, joint_words, info_content_norm)
         value = (np.linalg.norm(vec_1) * np.linalg.norm(vec_2))
-        if not value==0:
+        if not value == 0:
             return np.dot(vec_1, vec_2.T) / value
         else:
             return 0.0
@@ -161,7 +161,7 @@ class SemanticComparator(object):
         r1 = self.word_order_vector(words_1, joint_words, windex)
         r2 = self.word_order_vector(words_2, joint_words, windex)
         value = np.linalg.norm(r1 + r2)
-        if not value==0:
+        if not value == 0:
             return 1.0 - (np.linalg.norm(r1 - r2) / value)
         else:
             return 1.0 - (np.linalg.norm(r1 - r2))
@@ -171,6 +171,6 @@ class SemanticComparator(object):
 
     def must_train(self):
         return False
-    
+
     def compare(self, question1, question2):
         return float(1 - self.similarity(question1, question2, True))
