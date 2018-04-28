@@ -1,4 +1,5 @@
-import os, os.path, csv
+import os.path
+import csv
 from argparse import ArgumentParser
 from datetime import datetime
 from multiprocessing import Array
@@ -13,7 +14,7 @@ QUESTION2_COL = 2
 def define_runs(previous_path):
     first_run = 0
 
-    if previous_path is not None:
+    if previous_path:
         with open(previous_path) as previous_runs:
             reader = csv.reader(previous_runs)
             next(reader)  # Ignores the header
@@ -31,8 +32,7 @@ if __name__ == '__main__':
 
     parser = ArgumentParser('Computes the average error of a comparison technique')
 
-    parser.add_argument('-technique', dest='technique', required=True,
-                        choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
+    parser.add_argument('-technique', dest='technique', required=True, choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
     parser.add_argument('-training', dest='training_path', required=True)
     parser.add_argument('-questions', dest='questions_path', required=True)
     parser.add_argument('-np', dest='number_training', required=True, type=int)
@@ -76,7 +76,7 @@ if __name__ == '__main__':
             data_questions.append(row)
 
     total_runs = len(data_training[0])
-    first_run = define_runs(previous_path)
+    run_number = define_runs(previous_path)
 
     factory = ComparatorFactory()
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         if previous_path is None:
             writer.writerow(['Threshold', 'Error'])  # Header
 
-        for run in range(first_run, total_runs):
+        for run in range(run_number, total_runs):
             gu.print_screen('Starting run ' + str(run + 1))
 
             # Prepares the IDs of this run and the training questions
