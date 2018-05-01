@@ -1,10 +1,11 @@
-import csv, math, os, os.path, random
+import csv, math, os, os.path
 from datetime import datetime
 from argparse import ArgumentParser
 from multiprocessing import Process, Array
 from utils import parallel
 from utils import general_utils as gu
 from utils import io_utils
+from utils import question_sampler as sampler
 from comparators.ComparatorFactory import ComparatorFactory
 
 PAIR_ID_COL = 1
@@ -72,11 +73,6 @@ def create_file(technique, previous_path, result_path):
         return previous_path
 
 
-def save_sample_file(questions_data, questions_size, sample_path):
-    sample_full_path = os.path.join(sample_path, 'question_pairs_subset_' + str(questions_size) + ".csv")
-    io_utils.write_csv_file(sample_full_path, questions_data)
-
-
 def read_csv_file(quora_file_path, questions_size, sample_path):
     """
     Returns a random subset from the complete set of questions, applying a random sample.
@@ -87,23 +83,14 @@ def read_csv_file(quora_file_path, questions_size, sample_path):
     :return: two arrays which contains a subset of questions.
     """
     all_questions = []
-    questions = []
 
     with open(quora_file_path, 'r') as questions_file:
         reader = csv.reader(questions_file)
+        next(reader)
         for i, row in enumerate(reader):
             all_questions.append(row)
 
-    # Random sample only if questions_size is not zero.
-    questions_data = all_questions if not questions_size else random.sample(all_questions, questions_size)
-    save_sample_file(questions_data, questions_size, sample_path)
-
-    for i, row in enumerate(questions_data):
-        questions_data[i] = [i] + row
-        questions.append(row[QUESTION1_COL - 1])
-        questions.append(row[QUESTION2_COL - 1])
-
-    return questions, questions_data
+    return sampler.generate_sample(all_questions, questions_size, sample_path)
 
 
 def start_comparison(technique, quora_file_path, num_workers, previous_path, questions_size, results_path, batch_size):
