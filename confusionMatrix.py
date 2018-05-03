@@ -1,12 +1,15 @@
-import os.path
 import csv
-import numpy as np
+import os.path
 from argparse import ArgumentParser
 from datetime import datetime
 from multiprocessing import Array
+
+import numpy as np
+
+from comparators.ComparatorFactory import ComparatorFactory
 from utils import common_utils as cu
 from utils import general_utils as gu
-from comparators.ComparatorFactory import ComparatorFactory
+from utils import io_utils
 
 QUESTION1_COL = 1
 QUESTION2_COL = 2
@@ -35,10 +38,13 @@ if __name__ == '__main__':
     parser = ArgumentParser('Computes the confusion matrix of a comparison technique')
 
     parser.add_argument('-technique', dest='technique', required=True, choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
-    parser.add_argument('-training', dest='training_path', required=True)
-    parser.add_argument('-questions', dest='questions_path', required=True)
-    parser.add_argument('-threshold', dest='threshold', required=True, type=float)
-    parser.add_argument('-np', dest='number_training', required=True, type=int)
+    parser.add_argument('-training', dest='training_path', required=False)
+    parser.add_argument('-questions', dest='questions_path', required=False)
+    parser.add_argument('-threshold', dest='threshold', required=False, type=float)
+    parser.add_argument('-np', dest='number_training', required=False, type=int)
+    parser.add_argument('-runs', dest='runs', default=1, type=int, help='Total runs number')
+    parser.add_argument('-n', dest='questions_size', default=0, type=int, help='Questions subset size that will be processed (0 -> all the questions)')
+    parser.add_argument('-distances_path', dest='distances_path', default='/tmp', help='Path where the samples and distances files will be saved')
 
     parser.add_argument('-workers', dest='number_workers', default=5, type=int)
 
@@ -49,6 +55,9 @@ if __name__ == '__main__':
     avg_threshold = args.threshold
     num_training = args.number_training
     num_workers = args.number_workers
+    runs = args.runs
+    subset_size = args.questions_size
+    distances_path = args.distances_path
 
     if not os.path.exists('results'):
         os.mkdir('results')
@@ -58,6 +67,8 @@ if __name__ == '__main__':
 
     gu.print_screen('Loading files...')
 
+    # Creo que aca empieza lo que CREO que no va mas.
+    """
     data_training = []
     with open(training_path, 'r') as training_file:
         reader = csv.reader(training_file)
@@ -82,23 +93,39 @@ if __name__ == '__main__':
             training_questions.append(data_questions[i][QUESTION1_COL])
             training_questions.append(data_questions[i][QUESTION2_COL])
 
-    comparator = ComparatorFactory().get_comparator(technique, training_questions)
+    """
+    # Aca termina lo que no va mas.
 
-    question_pairs, relations = cu.prepare_relations(pair_ids, data_questions)
+    # ----- Aca agrego lo nuevo para leer los archivos ----
 
-    distances = Array('f', len(pair_ids))  # A shared array with all the distances
-    cu.distribute_comparing_work(question_pairs, distances, num_workers, comparator)
+    for run in range(1, runs + 1):  # Esto va a generar una matriz de confusion por sample.
+        sample_questions = io_utils.read_sample_file(distances_path, subset_size, run)
+        distances = io_utils.read_distances_file(distances_path, technique, run)
 
-    gu.print_screen('Computing confusion matrix')
-    confusion_matrix = create_confusion_matrix(relations, distances, avg_threshold, num_training)
+        print('-------- SAMPLE QUESTIONS ---------')
+        print(str(sample_questions))
 
-    with open(results_path, 'w') as results_file:
-        writer = csv.writer(results_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerows(confusion_matrix)
+        print('-------- DISTANCES ---------')
+        print(str(distances))
 
-    gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
+        # Arreglar de acá en adelante.
+        comparator = ComparatorFactory().get_comparator(technique, training_questions)
 
-    print('Confusion Matrix:')
-    print('=================')
-    print('\t' + "%.4f" % confusion_matrix[0][0] + '\t' + "%.4f" % confusion_matrix[0][1])
-    print('\t' + "%.4f" % confusion_matrix[1][0] + '\t' + "%.4f" % confusion_matrix[1][1])
+        question_pairs, relations = cu.prepare_relations(pair_ids, data_questions)
+
+        distances = Array('f', len(pair_ids))  # A shared array with all the distances
+        cu.distribute_comparing_work(question_pairs, distances, num_workers, comparator)
+
+        gu.print_screen('Computing confusion matrix')
+        confusion_matrix = create_confusion_matrix(relations, distances, avg_threshold, num_training)
+
+        with open(results_path, 'w') as results_file:
+            writer = csv.writer(results_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerows(confusion_matrix)
+
+        gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
+
+        print('Confusion Matrix:')
+        print('=================')
+        print('\t' + "%.4f" % confusion_matrix[0][0] + '\t' + "%.4f" % confusion_matrix[0][1])
+        print('\t' + "%.4f" % confusion_matrix[1][0] + '\t' + "%.4f" % confusion_matrix[1][1])
