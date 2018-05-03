@@ -9,18 +9,18 @@ COL_QUESTION_2 = 2
 COL_DUPLICATE_INDICATOR = 3
 
 
-def generate_sample(all_questions, questions_size, sample_path):
+def generate_sample(all_questions, questions_size, sample_path, run):
     questions, questions_data, duplicate_questions_count = sample_questions(all_questions, questions_size)
 
     if questions_size:
         is_good_sample = evaluate_sample(questions_size, duplicate_questions_count)
         if is_good_sample:
-            save_sample_file(questions_data, questions_size, sample_path)
+            save_sample_file(questions_data, questions_size, sample_path, run)
         else:
             gu.print_screen('Sample not good enough for statistics purposes. Running again.')
-            questions, questions_data = generate_sample(all_questions, questions_size, sample_path)  # Recursive call.
+            questions, questions_data = generate_sample(all_questions, questions_size, sample_path, run)  # Recursive call.
     else:
-        save_sample_file(questions_data, questions_size, sample_path)
+        save_sample_file(questions_data, questions_size, sample_path, run)
 
     return questions, questions_data
 
@@ -49,9 +49,9 @@ def evaluate_sample(questions_size, duplicate_questions_count):
     duplicate_rate = duplicate_questions_count / questions_size
     gu.print_screen('Duplicated question quantity: '
                     + str(duplicate_questions_count) + '/' + str(questions_size) + '. Rate: ' + str(duplicate_rate))
-    return 0.45 < duplicate_rate < 0.55
+    return 0.40 < duplicate_rate < 0.60
 
 
-def save_sample_file(questions_data, questions_size, sample_path):
-    sample_full_path = os.path.join(sample_path, 'question_pairs_subset_' + str(questions_size) + ".csv")
-    io_utils.write_csv_file(sample_full_path, questions_data)
+def save_sample_file(questions_data, questions_size, sample_path, run):
+    sample_full_path = os.path.join(sample_path, 'question_pairs_subset_' + str(questions_size) + '_' + str(run) + '.csv')
+    io_utils.write_csv_quora_sample(sample_full_path, questions_data)

@@ -60,9 +60,9 @@ def define_first_row(previous_path):
     return first_row
 
 
-def create_file(technique, previous_path, result_path):
+def create_file(technique, previous_path, result_path, run):
     if not previous_path:
-        results_path = os.path.join(result_path, 'computeDistance_' + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+        results_path = os.path.join(result_path, 'computeDistance_' + technique + '_' + str(run) + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
 
         with open(results_path, 'w') as results_file:
             writer = csv.writer(results_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -73,51 +73,35 @@ def create_file(technique, previous_path, result_path):
         return previous_path
 
 
-def read_csv_file(quora_file_path, questions_size, sample_path):
-    """
-    Returns a random subset from the complete set of questions, applying a random sample.
-
-    :param quora_file_path: csv file which contains all the questions.
-    :param questions_size: subset size.
-    :param sample_path: path where the sample file will be saved.
-    :return: two arrays which contains a subset of questions.
-    """
-    all_questions = []
-
-    with open(quora_file_path, 'r') as questions_file:
-        reader = csv.reader(questions_file)
-        next(reader)
-        for i, row in enumerate(reader):
-            all_questions.append(row)
-
-    return sampler.generate_sample(all_questions, questions_size, sample_path)
-
-
-def start_comparison(technique, quora_file_path, num_workers, previous_path, questions_size, results_path, batch_size):
-    gu.print_screen('Loading file...')
-
+def start_comparison(technique, quora_file_path, num_workers, previous_path, questions_size, results_path, batch_size, runs_number):
     io_utils.create_directory(results_path)
 
-    questions, questions_data = read_csv_file(quora_file_path, questions_size, results_path)
-    comparator = ComparatorFactory().get_comparator(technique, questions)
+    all_questions = io_utils.read_quora_csv_file(quora_file_path)
 
-    file_name = create_file(technique, previous_path, results_path)
-    current_batch = define_first_row(previous_path)
+    for run in range(1, runs_number + 1):
+        gu.print_screen('----- Run number ' + str(run) + ' ------')
 
-    total_questions_count = len(questions_data)
-    distances = Array('f', total_questions_count)
+        questions, questions_data = sampler.generate_sample(all_questions, questions_size, results_path, run)
 
-    while current_batch < total_questions_count:
-        total = batch_size if (current_batch + batch_size <= total_questions_count) else (
-            total_questions_count - current_batch)
-        end_batch = current_batch + total
+        comparator = ComparatorFactory().get_comparator(technique, questions)
 
-        distribute_comparing_work(questions_data[current_batch:end_batch], distances, num_workers, comparator)
-        write_results(file_name, questions_data[current_batch:end_batch], distances[current_batch:end_batch])
+        file_name = create_file(technique, previous_path, results_path, run)
+        current_batch = define_first_row(previous_path)
 
-        gu.print_screen('First ' + str(end_batch) + ' distances calculated.')
+        total_questions_count = len(questions_data)
+        distances = Array('f', total_questions_count)
 
-        current_batch += batch_size
+        while current_batch < total_questions_count:
+            total = batch_size if (current_batch + batch_size <= total_questions_count) else (
+                total_questions_count - current_batch)
+            end_batch = current_batch + total
+
+            distribute_comparing_work(questions_data[current_batch:end_batch], distances, num_workers, comparator)
+            write_results(file_name, questions_data[current_batch:end_batch], distances[current_batch:end_batch])
+
+            gu.print_screen('First ' + str(end_batch) + ' distances calculated.')
+
+            current_batch += batch_size
 
     gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
 
@@ -132,6 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('-q', dest='quora_path', required=True, help='Quora data set path (required)')
     parser.add_argument('-w', dest='number_workers', default=5, type=int, help='Number of parallel processes [default = 5]')
     parser.add_argument('-b', dest='batch_size', default=500, type=int, help='Batch size')
+    parser.add_argument('-runs', dest='runs', default=1, type=int, help='Total runs number')
     parser.add_argument('-n', dest='questions_size', default=0, type=int, help='Questions subset size that will be processed (0 -> all the questions)')
     parser.add_argument('-results_path', dest='results_path', default='/tmp', help='Path where the result files will be saved')
     parser.add_argument('-previous', dest='previous_path', help='Previous results file path (when you need to resume an unfinished experiment)')
@@ -143,4 +128,5 @@ if __name__ == '__main__':
                      args.previous_path,
                      args.questions_size,
                      args.results_path,
-                     args.batch_size)
+                     args.batch_size,
+                     args.runs)
