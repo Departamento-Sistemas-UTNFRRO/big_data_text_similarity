@@ -1,5 +1,7 @@
 import csv
 import os
+import glob
+
 from utils import general_utils as gu
 
 
@@ -28,3 +30,32 @@ def create_directory(dir_path):
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
         gu.print_screen('Directory created: ' + dir_path)
+
+
+# Temporary, ugly, function to get a sample file.
+def read_sample_file(base_path, sample_size, run_number):
+    sample_questions = []
+
+    file_path = base_path + '/question_pairs_subset_' + str(sample_size) + '_' + str(run_number) + '.csv'
+
+    with open(file_path, 'r') as questions_file:
+        reader = csv.reader(questions_file)
+        for i, row in enumerate(reader):
+            sample_questions.append(row)
+
+    return sample_questions
+
+
+# Temporary, ugly, function to get a distance file.
+def read_distances_file(base_path, technique, run_number):
+    distances = []
+
+    file_name = base_path + '/computeDistance_' + technique + '_' + str(run_number) + '_*.csv'  # I don't mind the date.
+    for filename in glob.glob(file_name):
+        with open(filename, 'r') as f:
+            reader = csv.reader(f)
+            next(reader)  # This has header, skipping it
+            for i, row in enumerate(reader):
+                distances.append(row)
+
+    return distances
