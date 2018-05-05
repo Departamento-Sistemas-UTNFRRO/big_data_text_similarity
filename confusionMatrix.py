@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser = ArgumentParser('Computes the confusion matrix of a comparison technique')
 
     parser.add_argument('-technique', dest='technique', required=True,
-                        choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
+                        choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem', 'ens'])
     parser.add_argument('-runs', dest='runs', default=1, type=int, help='Total runs number')
     parser.add_argument('-n', dest='sample_size', default=0, type=int,
                         help='Questions subset size that will be processed (0 -> all the questions)')
