@@ -2,11 +2,9 @@ import csv
 import os.path
 from argparse import ArgumentParser
 from datetime import datetime
-from multiprocessing import Array
 
 import numpy as np
 
-from comparators.ComparatorFactory import ComparatorFactory
 from utils import common_utils as cu
 from utils import general_utils as gu
 from utils import io_utils
@@ -15,12 +13,10 @@ QUESTION1_COL = 1
 QUESTION2_COL = 2
 
 
-def create_confusion_matrix(relations, distances, threshold, num_training):
+def create_confusion_matrix(real_relations, pair_distances, threshold):
     confusion_matrix = [[0, 0], [0, 0]]
 
-    guessed_relations = \
-        np.array([1 if distances[i] <= threshold else 0 for i in range(num_training, len(relations))])
-    real_relations = relations[num_training:len(relations)]
+    guessed_relations = np.array([1 if pair_distances[i] <= threshold else 0 for i in range(len(real_relations))])
 
     confusion_matrix[0][0] = ((real_relations == 0) * (guessed_relations == 0)).mean()
     confusion_matrix[0][1] = ((real_relations == 0) * (guessed_relations == 1)).mean()
@@ -37,95 +33,69 @@ if __name__ == '__main__':
 
     parser = ArgumentParser('Computes the confusion matrix of a comparison technique')
 
-    parser.add_argument('-technique', dest='technique', required=True, choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
-    parser.add_argument('-training', dest='training_path', required=False)
-    parser.add_argument('-questions', dest='questions_path', required=False)
-    parser.add_argument('-threshold', dest='threshold', required=False, type=float)
-    parser.add_argument('-np', dest='number_training', required=False, type=int)
+    parser.add_argument('-technique', dest='technique', required=True,
+                        choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'])
     parser.add_argument('-runs', dest='runs', default=1, type=int, help='Total runs number')
-    parser.add_argument('-n', dest='questions_size', default=0, type=int, help='Questions subset size that will be processed (0 -> all the questions)')
-    parser.add_argument('-distances_path', dest='distances_path', default='/tmp', help='Path where the samples and distances files will be saved')
-
-    parser.add_argument('-workers', dest='number_workers', default=5, type=int)
+    parser.add_argument('-n', dest='sample_size', default=0, type=int,
+                        help='Questions subset size that will be processed (0 -> all the questions)')
+    parser.add_argument('-input_path', dest='input_path', default='/tmp',
+                        help='Path where the samples and distances files will be saved')
 
     args = parser.parse_args()
     technique = args.technique
-    training_path = args.training_path
-    questions_path = args.questions_path
-    avg_threshold = args.threshold
-    num_training = args.number_training
-    num_workers = args.number_workers
     runs = args.runs
-    subset_size = args.questions_size
-    distances_path = args.distances_path
+    input_path = args.input_path
+    sample_size = args.sample_size
 
-    if not os.path.exists('results'):
-        os.mkdir('results')
+    io_utils.create_directory('results')
 
-    results_path = os.path.join('results', 'confusionMatrix_'
-                                + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+    threshold_errors = []  # Contains the best threshold and its error for each sample
+    confusion_matrix = []
 
-    gu.print_screen('Loading files...')
-
-    # Creo que aca empieza lo que CREO que no va mas.
-    """
-    data_training = []
-    with open(training_path, 'r') as training_file:
-        reader = csv.reader(training_file)
-
-        for row in reader:
-            data_training.append(row[1])  # Ignores the first column
-
-    data_questions = []
-    with open(questions_path, 'r') as questions_file:
-        reader = csv.reader(questions_file)
-        next(reader)  # Ignores the first line
-
-        for row in reader:
-            data_questions.append(row)
-
-    pair_ids = []
-    training_questions = []
-    for i, pair_id in enumerate(data_training):
-        pair_ids.append(int(pair_id))
-
-        if i < num_training:
-            training_questions.append(data_questions[i][QUESTION1_COL])
-            training_questions.append(data_questions[i][QUESTION2_COL])
-
-    """
-    # Aca termina lo que no va mas.
-
-    # ----- Aca agrego lo nuevo para leer los archivos ----
+    avg_threshold = 0
 
     for run in range(1, runs + 1):  # Esto va a generar una matriz de confusion por sample.
-        sample_questions = io_utils.read_sample_file(distances_path, subset_size, run)
-        distances = io_utils.read_distances_file(distances_path, technique, run)
+        sample_questions = io_utils.read_sample_file(input_path, sample_size, run)
+        distances = io_utils.read_distances_file(input_path, technique, run)
 
-        print('-------- SAMPLE QUESTIONS ---------')
-        print(str(sample_questions))
+        real_relations = np.zeros(sample_size)
+        pair_distances = []
+        for i in range(sample_size) :
+            real_relations[i] = int(sample_questions[i][4])
+            pair_distances.append(float(distances[i][1]))
 
-        print('-------- DISTANCES ---------')
-        print(str(distances))
+        threshold = cu.find_best_threshold(real_relations, pair_distances, sample_size)
+        error = cu.compute_validation_error(real_relations, pair_distances, threshold, sample_size)
 
-        # Arreglar de acá en adelante.
-        comparator = ComparatorFactory().get_comparator(technique, training_questions)
+        threshold_errors.append([threshold, error])
 
-        question_pairs, relations = cu.prepare_relations(pair_ids, data_questions)
+        if run < runs:
+            avg_threshold += threshold
+        else:
+            # Computes the confusion matrix with the last sample
+            avg_threshold = avg_threshold / (runs - 1)
 
-        distances = Array('f', len(pair_ids))  # A shared array with all the distances
-        cu.distribute_comparing_work(question_pairs, distances, num_workers, comparator)
+            gu.print_screen('Threshold used in confusion matrix: ' + str(avg_threshold))
 
-        gu.print_screen('Computing confusion matrix')
-        confusion_matrix = create_confusion_matrix(relations, distances, avg_threshold, num_training)
+            confusion_matrix = create_confusion_matrix(real_relations, pair_distances, avg_threshold)
 
-        with open(results_path, 'w') as results_file:
-            writer = csv.writer(results_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerows(confusion_matrix)
+    # Writes threshold and errors in a file
+    error_results_path = os.path.join('results', 'errors_'
+                                + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+    with open(error_results_path, 'w') as errors_file:
+        writer = csv.writer(errors_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerows(threshold_errors)
 
-        gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
+    # Writes confusion matrix in a file
+    matrix_results_path = os.path.join('results', 'confusionMatrix_'
+                                + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+    with open(matrix_results_path, 'w') as matrix_file:
+        writer = csv.writer(matrix_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerows(confusion_matrix)
 
-        print('Confusion Matrix:')
-        print('=================')
-        print('\t' + "%.4f" % confusion_matrix[0][0] + '\t' + "%.4f" % confusion_matrix[0][1])
-        print('\t' + "%.4f" % confusion_matrix[1][0] + '\t' + "%.4f" % confusion_matrix[1][1])
+    gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
+
+    print('Confusion Matrix:')
+    print('=================')
+    print('\t' + "%.4f" % confusion_matrix[0][0] + '\t' + "%.4f" % confusion_matrix[0][1])
+    print('\t' + "%.4f" % confusion_matrix[1][0] + '\t' + "%.4f" % confusion_matrix[1][1])
