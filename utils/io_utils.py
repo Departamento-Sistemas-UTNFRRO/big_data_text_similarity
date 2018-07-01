@@ -1,12 +1,19 @@
 import csv
 import os
 import glob
+import logging
 
-from utils import general_utils as gu
+
+def create_date_path(base_path, run_time):
+    create_directory(base_path)
+    date_path = os.path.join(base_path, '{:%Y%m%d_%H%M%S}'.format(run_time))
+    create_directory(date_path)
+
+    return date_path
 
 
 def read_quora_csv_file(quora_file_path):
-    gu.print_screen('Loading Quora questions file...')
+    logging.info('Loading Quora questions file...')
 
     all_questions = []
 
@@ -29,7 +36,7 @@ def write_csv_quora_sample(file_path, element_list):
 def create_directory(dir_path):
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
-        gu.print_screen('Directory created: ' + dir_path)
+        logging.info('Directory created: ' + dir_path)
 
 
 # Temporary, ugly, function to get a sample file.

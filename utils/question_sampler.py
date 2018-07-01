@@ -1,12 +1,15 @@
 import os
 import random
-from utils import general_utils as gu
 from utils import io_utils
+import utils.general_utils as gu
+import config
 
 COL_QUESTION_ID = 0
 COL_QUESTION_1 = 1
 COL_QUESTION_2 = 2
 COL_DUPLICATE_INDICATOR = 3
+
+logger = gu.get_logger(__name__)
 
 
 def generate_sample(all_questions, questions_size, sample_path, run):
@@ -17,7 +20,7 @@ def generate_sample(all_questions, questions_size, sample_path, run):
         if is_good_sample:
             save_sample_file(questions_data, questions_size, sample_path, run)
         else:
-            gu.print_screen('Sample not good enough for statistics purposes. Running again.')
+            logger.info('Sample not good enough for statistics purposes. Running again.')
             questions, questions_data = generate_sample(all_questions, questions_size, sample_path, run)  # Recursive call.
     else:
         save_sample_file(questions_data, questions_size, sample_path, run)
@@ -26,7 +29,7 @@ def generate_sample(all_questions, questions_size, sample_path, run):
 
 
 def sample_questions(all_questions, questions_size):
-    gu.print_screen('Generating a sample of ' + str(questions_size) + ' questions.')
+    logger.info('Generating a sample of ' + str(questions_size) + ' questions.')
     questions = []
     duplicate_questions_count = 0
 
@@ -47,9 +50,9 @@ def evaluate_sample(questions_size, duplicate_questions_count):
     Get rid of samples which the duplication rate is lower than 35% or greater than 75%.
     """
     duplicate_rate = duplicate_questions_count / questions_size
-    gu.print_screen('Duplicated question quantity: '
-                    + str(duplicate_questions_count) + '/' + str(questions_size) + '. Rate: ' + str(duplicate_rate))
-    return 0.40 < duplicate_rate < 0.60
+    logger.info('Duplicated question quantity: '
+                + str(duplicate_questions_count) + '/' + str(questions_size) + '. Rate: ' + str(duplicate_rate))
+    return config.sampling.get('duplicate_rate_min') < duplicate_rate < config.sampling.get('duplicate_rate_max')
 
 
 def save_sample_file(questions_data, questions_size, sample_path, run):

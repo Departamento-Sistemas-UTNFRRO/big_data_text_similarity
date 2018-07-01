@@ -1,11 +1,11 @@
 import os
-from utils import general_utils as gu
-from comparators.BagOfWordsComparator import BagOfWordsComparator
-from comparators.FastTextComparator import FastTextComparator
-from comparators.Word2VecComparator import Word2VecComparator
-from comparators.TFIDFComparator import TFIDFComparator
-from comparators.GensimTFIDFComparator import GensimTFIDFComparator
-from comparators.SemanticComparator import SemanticComparator
+import logging
+from comparators.BagOfWords import BagOfWords
+from comparators.FastText import FastText
+from comparators.Word2Vec import Word2Vec
+from comparators.TFIDF import TFIDF
+from comparators.GensimTFIDF import GensimTFIDF
+from comparators.Semantic import Semantic
 
 
 class ComparatorFactory(object):
@@ -17,24 +17,24 @@ class ComparatorFactory(object):
 
     def create_comparator(self, technique):
         if technique == 'bow':
-            self.comparator = BagOfWordsComparator()
+            self.comparator = BagOfWords()
         elif technique == 'tfidf':
-            self.comparator = TFIDFComparator()
+            self.comparator = TFIDF()
         elif technique == 'gtfidf':
-            self.comparator = GensimTFIDFComparator()
+            self.comparator = GensimTFIDF()
         elif technique == 'w2v':
-            self.comparator = Word2VecComparator()
+            self.comparator = Word2Vec()
         elif technique == 'ft':
-            self.comparator = FastTextComparator()
+            self.comparator = FastText()
         elif technique == 'sem':
-            self.comparator = SemanticComparator()
+            self.comparator = Semantic()
 
     def get_comparator(self, technique, questions):
         if self.comparator is None:
             self.create_comparator(technique)
 
         if self.comparator.must_train():
-            gu.print_screen('Training model...')
+            logging.info('Training model...')
 
             questions_run_dir = os.path.join('internal', 'questions')
             questions_run_file = os.path.join(questions_run_dir, 'questions.txt')
