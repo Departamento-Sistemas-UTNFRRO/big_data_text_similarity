@@ -8,7 +8,7 @@ ALPHA = 0.2
 BETA = 0.45
 ETA = 0.4
 PHI = 0.2
-DELTA = 0.85
+DELTA = 1  # Old value 0.85
 N = 0
 
 brown_freqs = dict()
@@ -82,7 +82,7 @@ class SemanticComparator(object):
 
     def word_similarity(self, word_1, word_2):
         synset_pair = self.get_best_synset_pair(word_1, word_2)
-        return (self.length_dist(synset_pair[0], synset_pair[1]) * self.hierarchy_dist(synset_pair[0], synset_pair[1]))
+        return self.length_dist(synset_pair[0], synset_pair[1]) * self.hierarchy_dist(synset_pair[0], synset_pair[1])
 
     def most_similar_word(self, word, word_set):
         max_sim = -1.0
@@ -167,7 +167,11 @@ class SemanticComparator(object):
             return 1.0 - (np.linalg.norm(r1 - r2))
 
     def similarity(self, sentence_1, sentence_2, info_content_norm):
-        return DELTA * self.semantic_similarity(sentence_1, sentence_2, info_content_norm) + (1.0 - DELTA) * self.word_order_similarity(sentence_1, sentence_2)
+        sem_similarity = self.semantic_similarity(sentence_1, sentence_2, info_content_norm)
+        if DELTA == 1:
+            return sem_similarity
+        else:
+            return DELTA * sem_similarity + (1.0 - DELTA) * self.word_order_similarity(sentence_1, sentence_2)
 
     def must_train(self):
         return False
