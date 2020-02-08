@@ -1,0 +1,9 @@
+# Fix distances.
+# python3 /Users/ftesone/dev/big_data_text_similarity/clusterEnsemble.py -techniques ft,gtfidf -questions_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/inputs/ft_fix_500" -results_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/results" -sample_size 500 -samples_number 10 -k 5 -clustering_runs 100 -in_progress_experiment_path "samples_size_500_count_10_k_5_runs_100_202006071735" -calc_distances_enabled
+
+# Recalculate coassociation matrix.
+# python3 /Users/ftesone/dev/big_data_text_similarity/clusterEnsemble.py -techniques bow,gtfidf,w2v,ft,sem -questions_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/inputs/ft_fix_500" -results_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/results" -sample_size 500 -samples_number 10 -k 5 -clustering_runs 100 -in_progress_experiment_path "samples_size_500_count_10_k_5_runs_100_202006071735" -clustering_enabled -ensemble_enabled -start_from_sample_num 3
+
+#python3 /Users/ftesone/dev/big_data_text_similarity/clusterEnsemble.py -techniques ft,gtfidf -questions_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/inputs/fix_1000" -results_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/results" -sample_size 1000 -samples_number 10 -k 5 -clustering_runs 100 -in_progress_experiment_path "samples_size_1000_count_10_k_5_runs_100_202006111926" -calc_distances_enabled -start_from_sample_num 2
+python3 /Users/ftesone/dev/big_data_text_similarity/clusterEnsemble.py -techniques bow,gtfidf,w2v,ft,sem -questions_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/inputs/w2v/1000_10" -results_path "/Users/ftesone/Documents/Tesis/experiments/ensembles/results" -sample_size 1000 -samples_number 10 -k 5 -clustering_runs 100 -in_progress_experiment_path "samples_size_1000_count_10_k_5_runs_100_202006111926" -calc_distances_enabled -clustering_enabled -ensemble_enabled -start_from_sample_num 9
+

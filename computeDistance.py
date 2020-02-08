@@ -116,8 +116,7 @@ def start_comparison(technique, quora_file_path, num_workers, previous_path, que
         distances = Array('f', total_questions_count)
 
         while current_batch < total_questions_count:
-            total = batch_size if (current_batch + batch_size <= total_questions_count) else (
-                total_questions_count - current_batch)
+            total = batch_size if (current_batch + batch_size <= total_questions_count) else (total_questions_count - current_batch)
             end_batch = current_batch + total
 
             distribute_comparing_work(questions_data[current_batch:end_batch], distances, num_workers, comparator)
@@ -141,7 +140,7 @@ if __name__ == '__main__':
     parser.add_argument('-q', dest='quora_path', required=True,
                         help='Quora data set path (required)')
     parser.add_argument('-w', dest='number_workers', default=8, type=int,
-                        help='Number of parallel processes [default = 5]')
+                        help='Number of parallel processes [default = 8]')
     parser.add_argument('-b', dest='batch_size', default=100000, type=int,
                         help='Batch size')
     parser.add_argument('-k', dest='runs', default=1, type=int,

@@ -29,7 +29,7 @@ class ComparatorFactory(object):
         elif technique == 'sem':
             self.comparator = SemanticComparator()
 
-    def get_comparator(self, technique, questions):
+    def get_comparator(self, technique, questions, re_generate_corpus=False):
         if self.comparator is None:
             self.create_comparator(technique)
 
@@ -42,7 +42,8 @@ class ComparatorFactory(object):
             if not os.path.exists(questions_run_dir):
                 os.makedirs(questions_run_dir)
 
-            self.create_questions_file(questions_run_file, questions)
+            if re_generate_corpus:
+                self.create_questions_file(questions_run_file, questions)
 
             self.comparator.train(questions_run_file)
 

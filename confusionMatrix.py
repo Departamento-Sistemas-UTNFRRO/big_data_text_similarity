@@ -100,7 +100,8 @@ if __name__ == '__main__':
 
     gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
 
-    print('Confusion Matrix:')
+    print('Confusion Matrix. Techique {0}, Sample Size {1}'.format(technique, str(sample_size)))
     print('=================')
     print('\t' + "%.4f" % confusion_matrix[0][0] + '\t' + "%.4f" % confusion_matrix[0][1])
     print('\t' + "%.4f" % confusion_matrix[1][0] + '\t' + "%.4f" % confusion_matrix[1][1])
+    print('=================\n\n')
