@@ -34,7 +34,7 @@ def replace_numbers(text):
 
 
 def remove_special_delimiters(text):
-    # Removes special characters that are at the begining of the sentence,
+    # Removes special characters that are at the beginning of the sentence,
     # at the end, or next to a space. It also separates words in the form word1/word2
     sentence = filter(None, re.split('^\W*|\W*\s\W*|\W*$|/', text))
     return ' '.join(sentence)
@@ -52,7 +52,7 @@ def clean_text(text):
 if __name__ == '__main__':
     start_time = datetime.now()
 
-    parser = argparse.ArgumentParser(description='Limpia las preguntas')
+    parser = argparse.ArgumentParser(description='Pre-procesamiento del conjunto de datos de entrada.')
     parser.add_argument('-quora', dest='quora_path', required=True)
     parser.add_argument('-results', dest='results_path', required=True)
     args = parser.parse_args()

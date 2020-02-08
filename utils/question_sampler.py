@@ -26,7 +26,9 @@ def generate_sample(all_questions, questions_size, sample_path, run):
 
 
 def sample_questions(all_questions, questions_size):
-    gu.print_screen('Generating a sample of ' + str(questions_size) + ' questions.')
+    if questions_size:
+        gu.print_screen('Generating a sample of ' + str(questions_size) + ' questions.')
+
     questions = []
     duplicate_questions_count = 0
 
@@ -49,7 +51,7 @@ def evaluate_sample(questions_size, duplicate_questions_count):
     duplicate_rate = duplicate_questions_count / questions_size
     gu.print_screen('Duplicated question quantity: '
                     + str(duplicate_questions_count) + '/' + str(questions_size) + '. Rate: ' + str(duplicate_rate))
-    return 0.40 < duplicate_rate < 0.60
+    return 0.35 < duplicate_rate < 0.75
 
 
 def save_sample_file(questions_data, questions_size, sample_path, run):

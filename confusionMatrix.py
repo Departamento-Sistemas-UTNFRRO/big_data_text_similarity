@@ -57,10 +57,12 @@ if __name__ == '__main__':
     for run in range(1, runs + 1):  # Esto va a generar una matriz de confusion por sample.
         sample_questions = io_utils.read_sample_file(input_path, sample_size, run)
         distances = io_utils.read_distances_file(input_path, technique, run)
+        sample_size = sample_size if sample_size != 0 else len(sample_questions)
 
         real_relations = np.zeros(sample_size)
         pair_distances = []
-        for i in range(sample_size) :
+
+        for i in range(sample_size):
             real_relations[i] = int(sample_questions[i][4])
             pair_distances.append(float(distances[i][1]))
 
@@ -73,7 +75,10 @@ if __name__ == '__main__':
             avg_threshold += threshold
         else:
             # Computes the confusion matrix with the last sample
-            avg_threshold = avg_threshold / (runs - 1)
+            if runs > 1:
+                avg_threshold = avg_threshold / (runs - 1)
+            else:
+                avg_threshold = threshold
 
             gu.print_screen('Threshold used in confusion matrix: ' + str(avg_threshold))
 
