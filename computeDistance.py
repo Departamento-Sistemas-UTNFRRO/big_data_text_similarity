@@ -86,14 +86,15 @@ def get_existing_sample(sample_path, sample_file_name, run_number):
         for row in reader:
             row[0] = int(row[0])
 
-            questions.append(row[2]) # Question 1
-            questions.append(row[3]) # Question 2
+            questions.append(row[2])  # Question 1
+            questions.append(row[3])  # Question 2
             questions_data.append(row)
 
     return questions, questions_data
 
 
 def start_comparison(technique, quora_file_path, num_workers, previous_path, questions_size, results_path, batch_size, runs_number, sample_path, sample_file_name):
+    results_path = results_path + "/" + technique + "/" + str(questions_size) + "_" + str(runs_number)
     io_utils.create_directory(results_path)
 
     all_questions = io_utils.read_quora_csv_file(quora_file_path)
@@ -139,11 +140,11 @@ if __name__ == '__main__':
                         help='Comparison technique (required)')
     parser.add_argument('-q', dest='quora_path', required=True,
                         help='Quora data set path (required)')
-    parser.add_argument('-w', dest='number_workers', default=5, type=int,
+    parser.add_argument('-w', dest='number_workers', default=8, type=int,
                         help='Number of parallel processes [default = 5]')
-    parser.add_argument('-b', dest='batch_size', default=500, type=int,
+    parser.add_argument('-b', dest='batch_size', default=100000, type=int,
                         help='Batch size')
-    parser.add_argument('-runs', dest='runs', default=1, type=int,
+    parser.add_argument('-k', dest='runs', default=1, type=int,
                         help='Total runs number')
     parser.add_argument('-n', dest='questions_size', default=0, type=int,
                         help='Questions subset size that will be processed (0 -> all the questions)')

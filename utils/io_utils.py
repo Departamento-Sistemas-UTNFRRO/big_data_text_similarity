@@ -51,6 +51,7 @@ def read_distances_file(base_path, technique, run_number):
     distances = []
 
     file_name = base_path + '/computeDistance_' + technique + '_' + str(run_number) + '_*.csv'  # I don't mind the date.
+
     for filename in glob.glob(file_name):
         with open(filename, 'r') as f:
             reader = csv.reader(f)

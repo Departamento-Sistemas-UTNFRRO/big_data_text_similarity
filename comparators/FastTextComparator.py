@@ -17,11 +17,7 @@ class FastTextComparator(Comparator):
 
     def train(self, questions_path, vector_length=100):
         self.dim = vector_length
-
-        model_name = 'model_' + os.path.split(questions_path)[-1].split('.')[0]
-        model_path = os.path.join(self.files_path, model_name)
-
-        self.model = fasttext.skipgram(questions_path, model_path, dim=self.dim, thread=4)
+        self.model = fasttext.train_unsupervised(questions_path, model='skipgram', dim=self.dim, thread=8)
 
     def compare(self, question1, question2):
         sentence_vector1 = self.prepare_vectors(question1)
