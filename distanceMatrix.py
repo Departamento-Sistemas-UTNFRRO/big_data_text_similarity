@@ -1,4 +1,4 @@
-import csv, math, os, os.path
+import csv, math, os.path
 from datetime import datetime
 from argparse import ArgumentParser
 from multiprocessing import Process, Array

@@ -51,7 +51,7 @@ def evaluate_sample(questions_size, duplicate_questions_count):
     duplicate_rate = duplicate_questions_count / questions_size
     gu.print_screen('Duplicated question quantity: '
                     + str(duplicate_questions_count) + '/' + str(questions_size) + '. Rate: ' + str(duplicate_rate))
-    return 0.35 < duplicate_rate < 0.75
+    return 0.35 <= duplicate_rate <= 0.65
 
 
 def save_sample_file(questions_data, questions_size, sample_path, run):
