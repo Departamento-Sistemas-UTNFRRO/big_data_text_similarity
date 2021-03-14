@@ -11,3 +11,5 @@ internal/*/*.*
 */*~
 
 *.pyc
+
+venv

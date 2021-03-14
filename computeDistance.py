@@ -153,7 +153,7 @@ if __name__ == '__main__':
                         help='Previous results file path (when you need to resume an unfinished experiment)')
     parser.add_argument('-sample', dest='sample_path',
                         help='Path to sample file (if not provided, creates a new sample)')
-    parser.add_argument('-sname', dest='sample_file_name',
+    parser.add_argument('-sample_file_name', dest='sample_file_name',
                         help='First part of the sample file name ( the string _runnumber.csv will be appended)')
 
     args = parser.parse_args()

@@ -16,17 +16,17 @@ class ComparatorFactory(object):
         self.comparator = None
 
     def __create_comparator(self, technique):
-        if technique == 'bow':
+        if technique.startswith('bow'):
             self.comparator = BowComparator()
-        elif technique == 'tfidf':
+        elif technique.startswith('tfidf'):
             self.comparator = TFIDFComparator()
-        elif technique == 'gtfidf':
+        elif technique.startswith('gtfidf'):
             self.comparator = GTFIDFComparator()
-        elif technique == 'w2v':
+        elif technique.startswith('w2v'):
             self.comparator = W2VComparator()
-        elif technique == 'ft':
+        elif technique.startswith('ft'):
             self.comparator = FTComparator()
-        elif technique == 'sem':
+        elif technique.startswith('sem'):
             self.comparator = SemComparator()
 
     def get_comparator(self, technique, questions=None, re_generate_corpus=False):

@@ -62,7 +62,6 @@ def get_coassociation_matrix(spark, path):
 
 def write_clustering_labels(cluster_labels, results_path, k, n, run_uuid):
     directory = results_path + '/labels'
-    io.create_directory(directory)
     file_dir = directory + '/labels_ID_' + str(run_uuid) + '_size_' + str(n) + '_clusters_' + str(k) + '.csv'
 
     with open(file_dir, 'w') as csv_file:
