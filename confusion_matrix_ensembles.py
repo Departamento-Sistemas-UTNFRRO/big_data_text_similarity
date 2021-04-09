@@ -106,6 +106,7 @@ def generate_report(runs, sample_size, experiment_path, confusion_matrix_array, 
     sum_cf_error = 0
     total_confusion_matrix = [[0, 0], [0, 0]]
 
+    error_report_content = ""
     for run in range(0, runs):
         confusion_matrix = confusion_matrix_array[run]
         sample_header = "\n\nSample number {0} \n".format(run + 1)
@@ -127,6 +128,8 @@ def generate_report(runs, sample_size, experiment_path, confusion_matrix_array, 
         total_confusion_matrix[1][0] += confusion_matrix[1][0]
         total_confusion_matrix[1][1] += confusion_matrix[1][1]
 
+        error_report_content += 'ensemble,' + str(sample_size) + "," + str(confusion_matrix[0][1] + confusion_matrix[1][0]) + "\n"
+
     total_confusion_matrix[0][0] = total_confusion_matrix[0][0] / runs
     total_confusion_matrix[0][1] = total_confusion_matrix[0][1] / runs
     total_confusion_matrix[1][0] = total_confusion_matrix[1][0] / runs
@@ -142,8 +145,12 @@ def generate_report(runs, sample_size, experiment_path, confusion_matrix_array, 
 
     report = header + body + results_line
 
-    with open(experiment_path + '/report.txt', "w") as file_report:
+    with open(experiment_path + '/report_new.txt', "w") as file_report:
         file_report.writelines(report)
+
+    error_report_content += 'ensemble,' + str(sample_size) + "," + str(total_confusion_matrix[0][1] + total_confusion_matrix[1][0])
+    with open(experiment_path + '/error_report.txt', "w") as file_report:
+        file_report.writelines(error_report_content)
 
 
 if __name__ == '__main__':

@@ -5,6 +5,4 @@ nltk
 fasttext==0.9.1
 gensim
 pyspark
-pyclustering
 pandas
-PyArrow

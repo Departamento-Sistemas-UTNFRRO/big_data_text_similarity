@@ -97,15 +97,6 @@ def get_triangular_matrix(questions_input):
         .withColumnRenamed('sequential_id', 'sequential_id_2') \
         .withColumnRenamed('question', 'question_2')
 
-    # n = 100
-    # https://stackoverflow.com/questions/37809834/how-to-compute-the-distance-matrix-in-spark
-    # indices = [(x, y) for x in range(0, n) for y in range(0, n) if x < y]
-    # indices_df = spark.createDataFrame(spark.sparkContext.parallelize(indices))
-    #
-    # joined1 = indices_df.join(questions_input, indices_df._1 == questions_input.sequential_id)
-    # joined2 = joined1.join(questions_input, joined1._2 == questions_input.sequential_id)
-
-    # Using <= this includes the main diagonal, using < it doesn't.
     return input_1.crossJoin(input_2) \
         .where(input_1.sequential_id_1 < input_2.sequential_id_2)
 

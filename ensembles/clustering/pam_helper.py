@@ -19,13 +19,14 @@ class PamHelper:
         for k in self.k_array:
             run_uuid = uuid.uuid1().int
             cluster_labels = self.k_medoids(sample_individual_questions_array, distance_matrix_dict, k, run_uuid)
-            if len(cluster_labels) != self.n:
-                raise Exception('Wrong number of cluster labels for clustering ID: ' + str(run_uuid))
-            ensembles_dao.write_clustering_labels(cluster_labels, timestamped_results_path, k, self.n, run_uuid)
+            if len(cluster_labels) == self.n:
+                ensembles_dao.write_clustering_labels(cluster_labels, timestamped_results_path, k, self.n, run_uuid)
+            else:
+                gu.print_screen('Wrong number of cluster labels for clustering ID: ' + str(run_uuid))
 
     def k_medoids(self, sample_individual_questions, similarity_matrix_dict, k, run_uuid):
         # Returns an array of size k, choosing random elements from 0 to sample_size
-        max_iterations = 100
+        max_iterations = 300
 
         gu.print_screen('Starting clustering ID: ' + str(run_uuid) + '. Initial k medoids k = ' + str(k))
         medoids = self.calculate_initial_medoids(k)
@@ -65,7 +66,7 @@ class PamHelper:
 
     def update_medoids(self, cluster_labels, medoids, k, medoids_similarity_sum, similarity_matrix_dict, run_uuid):
         # Store data points to the current cluster they belong to
-        clusters = []  # Ver si necesito esta coleccion, tambien esta en cluster_labels pero acomodado de otra manera.
+        clusters = []
         new_medoids = []
 
         # Build clusters in different collections.
@@ -102,14 +103,13 @@ class PamHelper:
 
     @staticmethod
     def get_similarity_to_medoid(similarity_matrix_dict, question_id_i, question_id_j):
-        if question_id_i == question_id_j:
-            return 1.0
+        lookup_pair = (question_id_i, question_id_j)
 
-        # We might need two look-ups because we don't know the order in the key (i, j) or (j, i) (triangular matrix).
-        similarity_to_medoid_record = similarity_matrix_dict.get((question_id_i, question_id_j))
-        if not similarity_to_medoid_record:
-            similarity_to_medoid_record = similarity_matrix_dict.get((question_id_j, question_id_i))
+        # Inverting lookup if j < i (triangular matrix concept).
+        if question_id_j < question_id_i:
+            lookup_pair = (question_id_j, question_id_i)
 
+        similarity_to_medoid_record = similarity_matrix_dict.get(lookup_pair)
         if similarity_to_medoid_record:
             return similarity_to_medoid_record['similarity']
         else:

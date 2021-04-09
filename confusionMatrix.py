@@ -26,6 +26,37 @@ def create_confusion_matrix(real_relations, pair_distances, threshold):
     return confusion_matrix
 
 
+def write_confusion_matrix(matrix_results_path, confusion_matrix):
+    with open(matrix_results_path, 'a') as matrix_file:
+        writer = csv.writer(matrix_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        row = [[0, 0, 0, 0]]
+        row[0][0] = confusion_matrix[0][0]
+        row[0][1] = confusion_matrix[0][1]
+        row[0][2] = confusion_matrix[1][0]
+        row[0][3] = confusion_matrix[1][1]
+        writer.writerows(row)
+
+
+def write_error_report(path, threshold_errors, technique, sample_size):
+    with open(path, 'a') as errors_file:
+        writer = csv.writer(errors_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        sum_error = 0
+        for threshold_row in threshold_errors:
+            row = [["", 0, 0]]
+            row[0][0] = technique
+            row[0][1] = sample_size
+            row[0][2] = threshold_row[1]
+            sum_error += threshold_row[1]
+            writer.writerows(row)
+
+        row = [["", 0, 0.0]]
+        row[0][0] = technique
+        row[0][1] = sample_size
+        row[0][2] = (sum_error / len(threshold_errors))
+        writer.writerows(row)
+
+
 if __name__ == '__main__':
     start_time = datetime.now()
 
@@ -38,12 +69,15 @@ if __name__ == '__main__':
     parser.add_argument('-runs', dest='runs', default=1, type=int, help='Total runs number')
     parser.add_argument('-n', dest='sample_size', default=0, type=int,
                         help='Questions subset size that will be processed (0 -> all the questions)')
+    parser.add_argument('-samples_path', dest='samples_path', default='/tmp',
+                        help='Path where the samples files will be saved')
     parser.add_argument('-input_path', dest='input_path', default='/tmp',
-                        help='Path where the samples and distances files will be saved')
+                        help='Path where the distances files will be saved')
 
     args = parser.parse_args()
     technique = args.technique
     runs = args.runs
+    samples_path = args.samples_path
     input_path = args.input_path
     sample_size = args.sample_size
 
@@ -54,8 +88,13 @@ if __name__ == '__main__':
 
     avg_threshold = 0
 
-    for run in range(1, runs + 1):  # Esto va a generar una matriz de confusion por sample.
-        sample_questions = io_utils.read_sample_file(input_path, sample_size, run)
+    error_results_path = os.path.join('results', 'errors_' + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+    error_report = os.path.join('results', 'z_errors_report_' + technique + '_' + str(sample_size) + '.csv')
+    matrix_results_path = os.path.join('results', 'confusionMatrix_' + technique + '_' + str(sample_size) + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+
+    total_confusion_matrix = [[0, 0], [0, 0]]
+    for run in range(1, runs + 1):
+        sample_questions = io_utils.read_sample_file(samples_path, sample_size, run)
         distances = io_utils.read_distances_file(input_path, technique, run)
         sample_size = sample_size if sample_size != 0 else len(sample_questions)
 
@@ -72,6 +111,9 @@ if __name__ == '__main__':
         threshold_errors.append([threshold, error])
 
         if run < runs:
+            confusion_matrix = create_confusion_matrix(real_relations, pair_distances, threshold)
+            write_confusion_matrix(matrix_results_path, confusion_matrix)
+
             avg_threshold += threshold
         else:
             # Computes the confusion matrix with the last sample
@@ -82,26 +124,30 @@ if __name__ == '__main__':
 
             gu.print_screen('Threshold used in confusion matrix: ' + str(avg_threshold))
 
-            confusion_matrix = create_confusion_matrix(real_relations, pair_distances, avg_threshold)
+            confusion_matrix = create_confusion_matrix(real_relations, pair_distances, threshold)
+            write_confusion_matrix(matrix_results_path, confusion_matrix)
 
-    # Writes threshold and errors in a file
-    error_results_path = os.path.join('results', 'errors_'
-                                + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
+        total_confusion_matrix[0][0] += confusion_matrix[0][0]
+        total_confusion_matrix[0][1] += confusion_matrix[0][1]
+        total_confusion_matrix[1][0] += confusion_matrix[1][0]
+        total_confusion_matrix[1][1] += confusion_matrix[1][1]
+
     with open(error_results_path, 'w') as errors_file:
         writer = csv.writer(errors_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerows(threshold_errors)
 
-    # Writes confusion matrix in a file
-    matrix_results_path = os.path.join('results', 'confusionMatrix_'
-                                + technique + '_' + '{:%Y%m%d_%H%M%S}'.format(datetime.now()) + '.csv')
-    with open(matrix_results_path, 'w') as matrix_file:
-        writer = csv.writer(matrix_file, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerows(confusion_matrix)
+    write_error_report(error_report, threshold_errors, technique, sample_size)
+
+    total_confusion_matrix[0][0] = total_confusion_matrix[0][0] / runs
+    total_confusion_matrix[0][1] = total_confusion_matrix[0][1] / runs
+    total_confusion_matrix[1][0] = total_confusion_matrix[1][0] / runs
+    total_confusion_matrix[1][1] = total_confusion_matrix[1][1] / runs
+    write_confusion_matrix(matrix_results_path, total_confusion_matrix)
 
     gu.print_screen('Script finished. Total time: ' + str(datetime.now() - start_time))
 
-    print('Confusion Matrix. Techique {0}, Sample Size {1}'.format(technique, str(sample_size)))
+    print('Confusion Matrix. Technique {0}, Sample Size {1}'.format(technique, str(sample_size)))
     print('=================')
-    print('\t' + "%.4f" % confusion_matrix[0][0] + '\t' + "%.4f" % confusion_matrix[0][1])
-    print('\t' + "%.4f" % confusion_matrix[1][0] + '\t' + "%.4f" % confusion_matrix[1][1])
+    print('\t' + "%.4f" % total_confusion_matrix[0][0] + '\t' + "%.4f" % total_confusion_matrix[0][1])
+    print('\t' + "%.4f" % total_confusion_matrix[1][0] + '\t' + "%.4f" % total_confusion_matrix[1][1])
     print('=================\n\n')
