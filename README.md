@@ -1,6 +1,6 @@
 # Ensemble method for community Question Answering sites based on cLustering
 
-This repository contains the necessary code to perform the experiments for the thesis "**Desarrollo de una medida de 
+This repository contains the necessary code to perform the experiments for the MS thesis "**Desarrollo de una medida de 
 similaridad para Sistemas de Recomendación en sitios de Community Question Answering. Análisis desde un enfoque 
 Big Data y usando un método de ensamble de clustering**" [See thesis PDF document](https://github.com/fedetesone/tesis_latex/blob/main/tesis.pdf)".
 
@@ -28,6 +28,7 @@ python3 preProcessQuestions.py -quora data/quora_duplicate_questions.tsv -result
 | --- | --- | --- | --- |
 |input|Raw data set path|true|--|
 |results|Results data set path|true|--|
+
 <br/><br/>
 ## Samples generation
 This process, besides generating the necessary question pair samples used by the main process, calculates the distance for each question pair. This is useful for two reasons:
@@ -51,6 +52,7 @@ python3 computeDistance.py -t bow -q data/question_pairs.csv
 |previous|Previous results file path (to resume an unfinished experiment).|false|--|
 |sample|Path to sample file (if not provided, creates a new sample)|false|--|
 |sample_file_name|First part of the sample file name (the string _runnumber.csv will be appended)|false|--|
+
 <br/><br/>
 ## Main Process
 
