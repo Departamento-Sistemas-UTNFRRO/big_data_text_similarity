@@ -1,4 +1,3 @@
-import csv
 import os.path
 from argparse import ArgumentParser
 from datetime import datetime
@@ -160,10 +159,10 @@ if __name__ == '__main__':
 
     parser = ArgumentParser('Computes the confusion matrix of a comparison technique')
 
-    parser.add_argument('-runs', dest='runs', default=1, type=int, help='Total runs number')
+    parser.add_argument('-runs', dest='runs', default=1, type=int, help='Total runs number', required=True)
     parser.add_argument('-sample_size', dest='sample_size', default=0, type=int,
-                        help='Questions subset size that will be processed (0 -> all the questions)')
-    parser.add_argument('-experiment_path', dest='experiment_path', default='/tmp', help='Path where the experiment was stored')
+                        help='Questions subset size that will be processed (0 -> all the questions)', required=True)
+    parser.add_argument('-experiment_path', dest='experiment_path', default='/tmp', help='Path where the experiment was stored', required=True)
 
     args = parser.parse_args()
 

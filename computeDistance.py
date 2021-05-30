@@ -137,12 +137,12 @@ if __name__ == '__main__':
 
     parser.add_argument('-t', dest='technique', required=True, choices=['bow', 'tfidf', 'gtfidf', 'w2v', 'ft', 'sem'],
                         help='Comparison technique (required)')
-    parser.add_argument('-q', dest='quora_path', required=True,
-                        help='Quora data set path (required)')
+    parser.add_argument('-q', dest='input_path', required=True,
+                        help='Question pair data set path (required)')
     parser.add_argument('-w', dest='number_workers', default=8, type=int,
                         help='Number of parallel processes [default = 8]')
     parser.add_argument('-b', dest='batch_size', default=100000, type=int,
-                        help='Batch size')
+                        help='Batch size. Number of question pairs distances calculated and written in one batch.')
     parser.add_argument('-k', dest='runs', default=1, type=int,
                         help='Total runs number')
     parser.add_argument('-n', dest='questions_size', default=0, type=int,
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('-sample', dest='sample_path',
                         help='Path to sample file (if not provided, creates a new sample)')
     parser.add_argument('-sample_file_name', dest='sample_file_name',
-                        help='First part of the sample file name ( the string _runnumber.csv will be appended)')
+                        help='First part of the sample file name (the string _runnumber.csv will be appended)')
 
     args = parser.parse_args()
 
