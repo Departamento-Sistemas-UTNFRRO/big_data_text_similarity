@@ -86,6 +86,7 @@ def generate_ensembles(techniques, base_input_path, samples_number, results_path
 
     gu.print_screen('Script finished. Total time: ' + str((datetime.now() - start_time).total_seconds()))
 
+
 def load_questions_sample(questions_path, sample_size, results_path):
     gu.print_screen('Getting sample as DF [sequential_id, pair_id, question_1, question_2, duplicate_indicator]')
     sample = ensembles_dao.get_questions_from_sample(spark, questions_path)
@@ -170,21 +171,23 @@ if __name__ == '__main__':
     parser = ArgumentParser('Computes the distance of each pair')
 
     parser.add_argument('-techniques', dest='techniques',
-                        help='Comma list separated of techniques. Full list: bow,tfidf,gtfidf,w2v,ft,sem.')
+                        help='Comma-separated list of techniques. Full list: bow,gtfidf,w2v,ft,sem.')
     parser.add_argument('-questions_path', dest='questions_path', required=True,
-                        help='Input question pair data set path (required)')
-    parser.add_argument('-sample_size', dest='sample_size', default=0, type=int, help='Questions set size.')
+                        help='Path where the input sample data set of CQA question pairs is located.')
+    parser.add_argument('-sample_size', dest='sample_size', default=0, type=int,
+                        help='Sample size. It is useful for build the input path and some data set generation.')
     parser.add_argument('-samples_number', dest='samples_number', required=True, default=1, type=int,
-                        help='Numbers of samples that are going to be taken in loop.')
+                        help='Numbers of samples that are going to be taken by the current experiment.')
     parser.add_argument('-results_path', dest='results_path', default='/Users/ftesone/Documents/Tesis/experiments',
-                        help='Path where the result files will be saved')
-    parser.add_argument('-k', dest='k', default=1, type=int, help='Number of clusters (medoids)')
-    parser.add_argument('-clustering_runs', dest='clustering_runs', default=1, type=int, help='Number of PAM clustering runs.')
-    parser.add_argument('-in_progress_experiment_path', dest='in_progress_experiment_path', default='', help='If null, creates a new folder the results.')
-    parser.add_argument('-calc_distances_enabled', dest='calc_distances_enabled', action='store_true', default=False)
-    parser.add_argument('-clustering_enabled', dest='clustering_enabled', action='store_true', default=False)
-    parser.add_argument('-ensemble_enabled', dest='ensemble_enabled', action='store_true', default=False)
-    parser.add_argument('-start_from_sample_num', dest='start_from_sample_num', default=1, type=int, help='Sample number to start from.')
+                        help='Path where the result files will be saved.')
+    parser.add_argument('-k', dest='k', default=1, type=int, help='Number of clusters (medoids).')
+    parser.add_argument('-clustering_runs', dest='clustering_runs', default=1, type=int, help='Number of k-medoids clustering runs.')
+    parser.add_argument('-in_progress_experiment_path', dest='in_progress_experiment_path', default='', help='If null, creates a new folder for the results.')
+    parser.add_argument('-calc_distances_enabled', dest='calc_distances_enabled', action='store_true', default=False, help="Enables distance calculation.")
+    parser.add_argument('-clustering_enabled', dest='clustering_enabled', action='store_true', default=False, help="Enables clustering.")
+    parser.add_argument('-ensemble_enabled', dest='ensemble_enabled', action='store_true', default=False, help="Enables ensemble.")
+    parser.add_argument('-start_from_sample_num', dest='start_from_sample_num', default=1, type=int,
+                        help='Sample number to start from, in case samples_number > 1.')
 
     args = parser.parse_args()
 

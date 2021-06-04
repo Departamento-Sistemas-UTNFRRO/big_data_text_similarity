@@ -53,7 +53,7 @@ if __name__ == '__main__':
     start_time = datetime.now()
 
     parser = argparse.ArgumentParser(description='Pre-procesamiento del conjunto de datos de entrada.')
-    parser.add_argument('-quora', dest='quora_path', required=True)
+    parser.add_argument('-input', dest='input_path', required=True)
     parser.add_argument('-results', dest='results_path', required=True)
     args = parser.parse_args()
 
